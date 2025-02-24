@@ -412,10 +412,26 @@ class SeedNoiseGeneration:
         length = latents.shape[0]
         single_shape = (1, latents.shape[1], latents.shape[2], latents.shape[3])
         all_noises = []
+
+        # custom noise logic to reduce random background changes
+        adjustment = 0
+        increment = True
+        maxAdjustement = 5
         # i starts at 0
         for i in range(length):
-            generator, raw_device = get_generator(device, seed+i+batch_offset)
+            # generator, raw_device = get_generator(device, seed+i+batch_offset)
+            generator, raw_device = get_generator(device, seed+adjustment+batch_offset)
             all_noises.append(torch.randn(single_shape, dtype=latents.dtype, layout=latents.layout, generator=generator, device=raw_device).to(device="cpu"))
+            
+            if increment:
+                adjustment += 1
+                if adjustment == maxAdjustement:
+                    increment = False
+            else:
+                adjustment -= 1
+                if adjustment == 0:
+                    increment = True
+
         final_noise = torch.cat(all_noises, dim=0)
         # convert to derivative noise type, if needed
         derivative_noise = SeedNoiseGeneration._create_derivative_noise(final_noise, noise_type=noise_type, seed=seed, extra_args=extra_args, device=device)
