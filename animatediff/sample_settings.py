@@ -416,7 +416,7 @@ class SeedNoiseGeneration:
         # custom noise logic to reduce random background changes
         adjustment = 0
         increment = True
-        maxAdjustement = 5
+        maxAdjustement = 7
         # i starts at 0
         for i in range(length):
             # generator, raw_device = get_generator(device, seed+i+batch_offset)
